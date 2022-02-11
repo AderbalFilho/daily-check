@@ -14,9 +14,15 @@ export const StyledButtonGroup = styled(ButtonGroup)`
 `;
 
 export const StyledFileInput = styled(FileInput)`
-  margin-top: 20px;
+  margin-right: 10px;
 `;
 
 export const StyledText = styled(Text)`
   margin-top: 10px;
+`;
+
+export const UploadInfo = styled.div`
+  align-items: center;
+  display: flex;
+  margin-top: 20px;
 `;

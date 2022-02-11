@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Alert, Button, Checkbox, Text } from '@blueprintjs/core';
+import { Alert, Button, Checkbox, Icon, Text } from '@blueprintjs/core';
+import { Tooltip2 } from "@blueprintjs/popover2";
 
 import * as S from './styles.js';
 
@@ -126,7 +127,25 @@ function TeamList() {
           {randomTeammate && <S.StyledText><b>Random result: {randomTeammate}</b></S.StyledText>}
         </>
       )}
-      <S.StyledFileInput onInputChange={getJson} />
+      <S.UploadInfo>
+        <S.StyledFileInput onInputChange={getJson} />
+        <Tooltip2
+          content={`
+            JSON format:
+            {
+              "Aderbal": {
+                "checked": false
+              },
+              "Anyone else": {
+                "checked": true
+              }
+            }
+          `}
+          placement="top"
+        >
+          <Icon icon="info-sign" intent="primary" />
+        </Tooltip2>
+      </S.UploadInfo>
     </S.Container>
   );
 }
