@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Button, Checkbox } from '@blueprintjs/core';
+import { Alert, Button, Checkbox, Text } from '@blueprintjs/core';
 
 import * as S from './styles.js';
 
@@ -7,6 +7,8 @@ function TeamList() {
   const [teamList, setTeamList] = useState();
   const [orderedTeamList, setOrderedTeamList] = useState();
   const [randomTeammate, setRandomTeammate] = useState();
+  const [rgpdConsent, setRgpdConsent] = useState(false);
+  const [firstOpened, setFirstOpened] = useState(true);
   const orderObjectByKey = (object) => {
     return Object.keys(object).sort().reduce(
       (obj, key) => {
@@ -46,7 +48,10 @@ function TeamList() {
     fileReader.readAsText(e.target.files[0], "UTF-8");
     fileReader.onload = e => {
       setTeamList(JSON.parse(e.target.result));
-      localStorage.setItem('team-list', e.target.result);
+
+      if (rgpdConsent) {
+        localStorage.setItem('team-list', e.target.result);
+      }
     };
   };
   const handleRandom = () => {
@@ -60,14 +65,34 @@ function TeamList() {
 
     setRandomTeammate(unchecked[Math.floor(Math.random() * unchecked.length)]);
   }
+  const handleReset = () => {
+    orderTeamList();
+    setRandomTeammate();
+  }
+  const handleClose = (confirm) => {
+    if (confirm) {
+      setRgpdConsent(true);
+      localStorage.setItem('rgpd-consent', 'true');
+    }
+
+    setFirstOpened(false);
+  }
 
   useEffect(() => {
-    const team = JSON.parse(localStorage.getItem('team-list'));
+    const consent = localStorage.getItem('rgpd-consent') === 'true';
 
-    if (team) {
-      setTeamList(team);
-    }
+    setRgpdConsent(consent);
   }, []);
+
+  useEffect(() => {
+    if (rgpdConsent) {
+      const team = JSON.parse(localStorage.getItem('team-list'));
+
+      if (team) {
+        setTeamList(team);
+      }
+    }
+  }, [rgpdConsent]);
 
   useEffect(() => {
     if (teamList) {
@@ -77,6 +102,18 @@ function TeamList() {
 
   return (
     <S.Container>
+      {!rgpdConsent && (
+        <Alert
+          isOpen={firstOpened}
+          canEscapeKeyCancel={true}
+          canOutsideClickCancel={true}
+          onClose={handleClose}
+        >
+          <Text>
+            This site uses cookies (namely localStorage to save your JSON and this answer) to improve its performance.
+          </Text>
+        </Alert>
+      )}
       {orderedTeamList && (
         <>
           {Object.entries(orderedTeamList).map(([name, details]) => {
@@ -84,7 +121,7 @@ function TeamList() {
           })}
           <S.StyledButtonGroup>
             <Button icon="clean" intent="primary" text="Choose random" onClick={() => handleRandom()} />
-            <Button icon="refresh" intent="danger" text="Reset" onClick={() => orderTeamList()} />
+            <Button icon="refresh" intent="danger" text="Reset" onClick={() => handleReset()} />
           </S.StyledButtonGroup>
           {randomTeammate && <S.StyledText><b>Random result: {randomTeammate}</b></S.StyledText>}
         </>
