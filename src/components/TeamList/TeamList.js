@@ -8,6 +8,8 @@ function TeamList() {
   const [teamList, setTeamList] = useState();
   const [orderedTeamList, setOrderedTeamList] = useState();
   const [randomTeammate, setRandomTeammate] = useState();
+  const [lastSpoken, setLastSpoken] = useState();
+  const [lastChecked, setLastChecked] = useState();
   const [rgpdConsent, setRgpdConsent] = useState(false);
   const [firstOpened, setFirstOpened] = useState(true);
   const orderObjectByKey = (object) => {
@@ -36,19 +38,25 @@ function TeamList() {
     checked = orderObjectByKey(checked);
     unchecked = orderObjectByKey(unchecked);
 
+    if (Object.keys(unchecked).length === 0) {
+      setLastSpoken(lastChecked);
+
+      if (rgpdConsent) {
+        localStorage.setItem('last-spoken', lastChecked);
+      }
+    }
+
     setOrderedTeamList({ ...unchecked, ...checked });
   };
   const handleEnabledChange = (name) => {
-    orderTeamList({
-      ...orderedTeamList,
-      [name]: { ...orderedTeamList[name], checked: !orderedTeamList[name].checked }
-    });
+    setLastChecked(name);
   };
   const getJson = e => {
     const fileReader = new FileReader();
     fileReader.readAsText(e.target.files[0], "UTF-8");
     fileReader.onload = e => {
       setTeamList(JSON.parse(e.target.result));
+      setLastSpoken('');
 
       if (rgpdConsent) {
         localStorage.setItem('team-list', e.target.result);
@@ -78,6 +86,13 @@ function TeamList() {
 
     setFirstOpened(false);
   }
+  const resetLastSpoken = () => {
+    setLastSpoken('');
+
+    if (rgpdConsent) {
+      localStorage.setItem('last-spoken', '');
+    }
+  }
 
   useEffect(() => {
     const consent = localStorage.getItem('rgpd-consent') === 'true';
@@ -88,6 +103,7 @@ function TeamList() {
   useEffect(() => {
     if (rgpdConsent) {
       const team = JSON.parse(localStorage.getItem('team-list'));
+      setLastSpoken(localStorage.getItem('last-spoken'));
 
       if (team) {
         setTeamList(team);
@@ -100,6 +116,14 @@ function TeamList() {
       orderTeamList();
     }
   }, [teamList]);
+  useEffect(() => {
+    if (lastChecked) {
+      orderTeamList({
+        ...orderedTeamList,
+        [lastChecked]: { ...orderedTeamList[lastChecked], checked: !orderedTeamList[lastChecked].checked }
+      });
+    }
+  }, [lastChecked]);
 
   return (
     <S.Container>
@@ -111,9 +135,17 @@ function TeamList() {
           onClose={handleClose}
         >
           <Text>
-            This site uses cookies (namely localStorage to save your JSON and this answer) to improve its performance.
+            This site uses cookies (namely localStorage to save your JSON, this answer and last one who spoke) to improve its performance.
           </Text>
         </Alert>
+      )}
+      {lastSpoken && (
+        <S.LastSpoken>
+          <Text>
+            <b>Last one who spoke: {lastSpoken}</b>
+          </Text>
+          <S.ResetLastSpoken intent="primary" text="OK" onClick={() => resetLastSpoken()} />
+        </S.LastSpoken>
       )}
       {orderedTeamList && (
         <>

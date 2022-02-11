@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { ButtonGroup, FileInput, Text } from '@blueprintjs/core';
+import { Button, ButtonGroup, FileInput, Text } from '@blueprintjs/core';
 
 export const Container = styled.div`
   align-items: center;
@@ -19,6 +19,16 @@ export const StyledFileInput = styled(FileInput)`
 
 export const StyledText = styled(Text)`
   margin-top: 10px;
+`;
+
+export const LastSpoken = styled.div`
+  align-items: center;
+  display: flex;
+  margin-bottom: 10px;
+`;
+
+export const ResetLastSpoken = styled(Button)`
+  margin-left: 10px;
 `;
 
 export const UploadInfo = styled.div`
